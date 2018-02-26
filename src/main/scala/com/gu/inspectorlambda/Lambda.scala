@@ -6,7 +6,7 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.typesafe.scalalogging.StrictLogging
 import com.amazonaws.regions.{Region, Regions}
-import com.amazonaws.services.ec2.model.{Instance, Reservation}
+import com.amazonaws.services.ec2.model.{CreateTagsRequest, Instance, Reservation, Tag}
 import com.amazonaws.services.ec2.{AmazonEC2, AmazonEC2Async, AmazonEC2AsyncClientBuilder, AmazonEC2ClientBuilder}
 import com.amazonaws.services.lambda.model.ListTagsRequest
 import com.amazonaws.services.lambda.runtime.events.ConfigEvent
@@ -26,11 +26,21 @@ class Lambda extends RequestHandler[ConfigEvent, Unit] with StrictLogging {
 
   def doIt(client: AmazonEC2) = {
     val instances = getInstances(client)
-    val matchingInstanceSets = for {
+
+    val matchingInstanceSets = (for {
       tagCombo <- getTagCombos(instances)
+      newTag = constructNewTag(tagCombo)
       matchingInstances = getInstancesWithMatchingTags(instances, tagCombo)
-    } yield matchingInstances
-    matchingInstanceSets.foreach(mis => logger.info(s"Found set of $mis"))
+    } yield (newTag -> matchingInstances)).toMap
+
+    matchingInstanceSets.foreach(mis => {
+      logger.info(s"Found set: ${mis._1} -> ${mis._2}")
+      val tagsRequest = new CreateTagsRequest()
+        .withTags(new Tag("Inspection", mis._1))
+        .withResources(mis._2.toList.asJava)
+      client.createTags(tagsRequest)
+    })
+
     logger.info("Done")
   }
 
@@ -57,7 +67,7 @@ class Lambda extends RequestHandler[ConfigEvent, Unit] with StrictLogging {
     val instancesWithStage = getInstancesWithMatchingTag(instancesWithStack, "Stage", tc.stage)
     instancesWithStage.take(instancesPerTagCount).map(i => i.getInstanceId)
   }
-  
+
   private def getInstancesWithMatchingTag(instances: Set[Instance], key:String, value:Option[String]): Set[Instance] = {
     value match {
       case None => {
