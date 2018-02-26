@@ -26,23 +26,20 @@ class Lambda extends RequestHandler[ConfigEvent, Unit] with StrictLogging {
 
   def doIt(client: AmazonEC2) = {
     val instances = getInstances(client)
-    for {
+    val matchingInstanceSets = for {
       tagCombo <- getTagCombos(instances)
-      _ <- logger.info(tagCombo.toString)
       matchingInstances = getInstancesWithMatchingTags(instances, tagCombo)
-      _ <- logger.info(matchingInstances.size.toString)
     } yield matchingInstances
-
-//    val tagSet = getTagCombos(instances)
-//    tagSet.foreach(tc => {
-//      logger.info(tc.toString)
-//      val matchingInstances = getInstancesWithMatchingTags(instances, tc)
-//      logger.info(matchingInstances.size.toString)
-//    })
+    matchingInstanceSets.foreach(mis => logger.info(s"Found set of $mis"))
+    logger.info("Done")
   }
 
   private def constructNewTag(tagCombo: TagCombo): String = {
-    
+    val epoch = System.currentTimeMillis / 1000
+    val stack = tagCombo.stack.getOrElse("None")
+    val app = tagCombo.app.getOrElse("None")
+    val stage = tagCombo.stage.getOrElse("None")
+    s"$stack-$app-$stage-$epoch"
   }
 
 
@@ -54,12 +51,13 @@ class Lambda extends RequestHandler[ConfigEvent, Unit] with StrictLogging {
     } yield instance).toSet
   }
 
-  private def getInstancesWithMatchingTags(instances: Set[Instance], tc:TagCombo): Set[Instance] = {
+  private def getInstancesWithMatchingTags(instances: Set[Instance], tc:TagCombo): Set[String] = {
     val instancesWithApp = getInstancesWithMatchingTag(instances, "App", tc.app)
     val instancesWithStack = getInstancesWithMatchingTag(instancesWithApp, "Stack", tc.stack)
     val instancesWithStage = getInstancesWithMatchingTag(instancesWithStack, "Stage", tc.stage)
-    instancesWithStage.take(instancesPerTagCount)
+    instancesWithStage.take(instancesPerTagCount).map(i => i.getInstanceId)
   }
+  
   private def getInstancesWithMatchingTag(instances: Set[Instance], key:String, value:Option[String]): Set[Instance] = {
     value match {
       case None => {
