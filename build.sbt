@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-lambda" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-config" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
-  "com.amazonaws" % "aws-java-sdk-elasticloadbalancing" % awsSdkVersion,
+  "com.amazonaws" % "aws-java-sdk-inspector" % awsSdkVersion,
   "com.typesafe.scala-logging" %% "scala-logging" % "3.8.0",
   "ch.qos.logback" %  "logback-classic" % "1.1.7"
 )
