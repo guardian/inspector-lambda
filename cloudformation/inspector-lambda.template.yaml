@@ -27,7 +27,6 @@ Resources:
             - inspector:CreateResourceGroup
             - inspector:CreateAssessmentTarget
             - inspector:CreateAssessmentTemplate
-            - inspector:StartAssessment
             - logs:*
             - ec2:CreateTag*
             - ec2:Read*
