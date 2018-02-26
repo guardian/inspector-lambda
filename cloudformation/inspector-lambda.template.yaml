@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Centralised security reporting for AWS
+
+Resources:
+
+  InspectorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: inspector-policy
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Resource:
+            - "*"
+            Action:
+            - inspector:StartAssessmentRun
+            - inspector:CreateResourceGroup
+            - inspector:CreateAssessmentTarget
+            - inspector:CreateAssessmentTemplate
+            - inspector:StartAssessment
+            - logs:*
+            - ec2:CreateTag*
+            - ec2:Read*
+            - ec2:Describe*
+
+  InspectorLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      Code:
+        S3Bucket: security-dist
+        S3Key: inspector-lambda/inspector-lambda.jar
+      Description: "A regular rescan of a few instances for each Stack, App, Stage combination present"
+      FunctionName: inspectorlambda
+      Handler: com.gu.inspectorlambda.Lambda::handleRequest
+      Role:
+        Fn::GetAtt: [ "InspectorRole", "Arn" ]
+      Runtime: java8
+      MemorySize: 256
+      Timeout: 60
+
+  InspectorScheduleRule:
+    Type: "AWS::Events::Rule"
+    Properties:
+      Name: InspectionScheduler
+      ScheduleExpression: cron(0 3 ? * MON,FRI *)
+      Targets:
+        -
+          Arn:
+            Fn::GetAtt:
+              - "InspectorLambda"
+              - "Arn"
+          Id: "InspectorLambda"
+
+  InspectorLogGroup:
+    Type: "AWS::Logs::LogGroup"
+    Properties:
+      LogGroupName: /aws/lambda/inspectorlambda
+      RetentionInDays: 30
+
+  InspectorLambdaPermission:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: inspectorlambda
+      Principal: events.amazonaws.com
+      SourceArn:
+        Fn::GetAtt: [ "InspectorScheduleRule", "Arn" ]
+
+
