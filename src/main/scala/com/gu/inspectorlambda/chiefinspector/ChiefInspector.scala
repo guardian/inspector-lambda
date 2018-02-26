@@ -128,17 +128,8 @@ object ChiefInspector extends StrictLogging {
 
   private[inspectorlambda] def getInstancesWithMatchingTag(instances: Set[SimpleInstance], key:String, value:Option[String]): Set[SimpleInstance] = {
     value match {
-      case None =>
-        for {
-          instance <- instances
-          if !instance.tags.keys.toSet.contains(key)
-        } yield instance
-      case Some(realValue) =>
-        for {
-          instance <- instances
-          tag <- instance.tags.toSet.filter(t => t._1.equals(key))
-          if tag._2.equals(realValue)
-        } yield instance
+      case None =>  instances.filter(i => !i.tags.keys.toSet.contains(key))
+      case Some(realValue) => instances.filter(i => i.tags.toSet.contains((key, realValue)))
     }
   }
 
