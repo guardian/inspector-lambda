@@ -14,7 +14,9 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-ec2" % awsSdkVersion,
   "com.amazonaws" % "aws-java-sdk-inspector" % awsSdkVersion,
   "com.typesafe.scala-logging" %% "scala-logging" % "3.8.0",
-  "ch.qos.logback" %  "logback-classic" % "1.1.7"
+  "ch.qos.logback" %  "logback-classic" % "1.1.7",
+  "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
+  "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
 )
 
 scalacOptions := Seq("-unchecked", "-deprecation")
