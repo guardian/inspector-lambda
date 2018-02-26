@@ -142,7 +142,7 @@ object ChiefInspector extends StrictLogging {
     }
   }
 
-  private def getTagCombos(instances: Set[SimpleInstance]) = {
+  private[inspectorlambda] def getTagCombos(instances: Set[SimpleInstance]) = {
     for {
       instance <- instances
       app = instance.tags.get("App")
