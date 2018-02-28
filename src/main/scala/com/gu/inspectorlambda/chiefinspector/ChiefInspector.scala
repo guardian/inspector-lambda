@@ -2,12 +2,9 @@ package com.gu.inspectorlambda.chiefinspector
 
 import com.typesafe.scalalogging.StrictLogging
 import com.amazonaws.services.ec2.AmazonEC2
-import com.amazonaws.services.ec2.model.{CreateTagsRequest, Tag}
 import com.amazonaws.services.inspector.AmazonInspector
-import com.amazonaws.services.inspector.model._
 import com.gu.inspectorlambda.model.{SimpleInstance, TagCombo}
-
-import scala.collection.JavaConverters._
+import com.gu.inspectorlambda.aws._
 
 object ChiefInspector extends StrictLogging {
 
@@ -23,100 +20,46 @@ object ChiefInspector extends StrictLogging {
   //  "name": "Common Vulnerabilities and Exposures",
   //  "arn": "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-ubA5XvBh",
 
+  val inspectionTagName = "Inspection"
   private val instancesPerTagCount = 5
-  private val inspectionTagName = "Inspection"
 
   def createAndRunAssessments(ec2Client: AmazonEC2, inspectorClient: AmazonInspector): Unit = {
-    val instances = getRunningInstances(ec2Client)
+    val ec2 = new AWSEC2(ec2Client)
+    val inspector = new AWSInspector(inspectorClient)
+    val instances = ec2.getRunningInstances
+    val allInstanceIds = instances.map(i => i.instanceId)
 
     val matchingInstanceSets = (for {
       tagCombo <- getTagCombos(instances)
-      newTag = constructNewTag(tagCombo)
       matchingInstances = getInstancesWithMatchingTags(instances, tagCombo)
-    } yield newTag -> matchingInstances).toMap
+    } yield tagCombo -> matchingInstances).toMap
 
     matchingInstanceSets.foreach( mis => {
-      val name = mis._1
-      val instanceIds = mis._2
-      logger.info(s"Found set: $name -> $instanceIds")
-      createTags(ec2Client, name, instanceIds)
-      val resourceGroupArn: String = createResourceGroup(inspectorClient, name)
-      val assessmentTargetArn = createAssessmentTarget(inspectorClient, name, resourceGroupArn)
-      val assessmentTemplateArn = createAssessmentTemplate(inspectorClient, name, assessmentTargetArn)
-      startAssessmentRun(inspectorClient, name, assessmentTemplateArn)
+      val tagCombo = mis._1
+      val name = constructName(tagCombo)
+      val nameEpoch = constructNameEpoch(tagCombo)
+      val matchingInstanceIds = mis._2
+      logger.info(s"Found set: $name -> $matchingInstanceIds")
+      ec2.removeTags(name, allInstanceIds)
+      ec2.createTags(name, matchingInstanceIds)
+      val resourceGroupArn: String = inspector.getResourceGroup(name) getOrElse inspector.createResourceGroup(name)
+      val assessmentTargetArn = inspector.getAssessmentTarget(name, resourceGroupArn) getOrElse inspector.createAssessmentTarget(name, resourceGroupArn)
+      val assessmentTemplateArn = inspector.getAssessmentTemplate(name, assessmentTargetArn) getOrElse inspector.createAssessmentTemplate(name, assessmentTargetArn)
+      inspector.startAssessmentRun(nameEpoch, assessmentTemplateArn)
     })
 
     logger.info("Done")
   }
 
-  private def startAssessmentRun(inspectorClient: AmazonInspector, name: String, assessmentTemplateArn: String): Unit = {
-    val startAssessmentRunRequest = new StartAssessmentRunRequest()
-      .withAssessmentRunName(name)
-      .withAssessmentTemplateArn(assessmentTemplateArn)
-    try {
-      inspectorClient.startAssessmentRun(startAssessmentRunRequest)
-      logger.error(s"Assessment run started for $name")
-    } catch {
-      case e: InvalidInputException =>
-        logger.error(s"No instances available for $name (${e.getMessage})")
-    }
+  private[inspectorlambda] def constructNameEpoch(tagCombo: TagCombo): String = {
+    s"${constructName(tagCombo)}-${System.currentTimeMillis()}"
   }
 
-  private def createAssessmentTemplate(inspectorClient: AmazonInspector, name: String, arn: String) = {
-    val createAssessmentTemplateRequest = new CreateAssessmentTemplateRequest()
-      .withAssessmentTargetArn(arn)
-      .withDurationInSeconds(3600)
-      .withRulesPackageArns(
-        "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-lLmwe1zd",
-        "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-SnojL3Z6"
-      )
-      .withUserAttributesForFindings(new Attribute().withKey(inspectionTagName).withValue(name))
-      .withAssessmentTemplateName(name)
-    val createAssessmentTemplateResult = inspectorClient.createAssessmentTemplate(createAssessmentTemplateRequest)
-    createAssessmentTemplateResult.getAssessmentTemplateArn
-  }
-
-  private def createAssessmentTarget(inspectorClient: AmazonInspector, name: String, arn: String) = {
-    val createAssessmentTargetRequest = new CreateAssessmentTargetRequest()
-      .withResourceGroupArn(arn)
-      .withAssessmentTargetName(name)
-    val createAssessmentTargetResult = inspectorClient.createAssessmentTarget(createAssessmentTargetRequest)
-    createAssessmentTargetResult.getAssessmentTargetArn
-  }
-
-  private def createTags(ec2Client: AmazonEC2, name: String, instanceIds: Set[String]) = {
-    val tagsRequest = new CreateTagsRequest()
-      .withTags(new Tag(inspectionTagName, name))
-      .withResources(instanceIds.toList.asJava)
-    ec2Client.createTags(tagsRequest)
-  }
-
-  private def createResourceGroup(inspectorClient: AmazonInspector, name: String) = {
-    val createResourceGroupRequest = new CreateResourceGroupRequest()
-      .withResourceGroupTags(new ResourceGroupTag()
-        .withKey(inspectionTagName)
-        .withValue(name)
-      )
-    val createResourceGroupResult = inspectorClient.createResourceGroup(createResourceGroupRequest)
-    createResourceGroupResult.getResourceGroupArn
-  }
-
-  private[inspectorlambda] def constructNewTag(tagCombo: TagCombo): String = {
-    val epoch = System.currentTimeMillis / 1000
+  private[inspectorlambda] def constructName(tagCombo: TagCombo): String = {
     val stack = tagCombo.stack.getOrElse("None")
     val app = tagCombo.app.getOrElse("None")
     val stage = tagCombo.stage.getOrElse("None")
-    s"$stack-$app-$stage-$epoch"
-  }
-
-  private def getRunningInstances(client: AmazonEC2): Set[SimpleInstance] = {
-    (for {
-      reservation <- client.describeInstances().getReservations.asScala
-      instance <- reservation.getInstances.asScala
-      if instance.getState.getName.equals("running")
-      tags = instance.getTags.asScala.map(t => t.getKey -> t.getValue).toMap
-      simpleInstance = SimpleInstance(instance.getInstanceId, tags)
-    } yield simpleInstance).toSet
+    s"AWSInspection-$stack-$app-$stage"
   }
 
   private[inspectorlambda] def getInstancesWithMatchingTags(instances: Set[SimpleInstance], tc:TagCombo): Set[String] = {
