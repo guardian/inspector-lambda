@@ -129,13 +129,22 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
     }
   }
 
+  private val SECURITY_BEST_PRACTICES
+    = "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-SnojL3Z6"
+  private val CIS_OPERATING_SYSTEM_SECURITY_CONFIGURATION_BENCHMARKS
+    = "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-sJBhCr0F"
+  private val RUNTIME_BEHAVIOUR_ANALYSIS
+    = "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-lLmwe1zd"
+  private val COMMON_VULNERABILITIES_AND_EXPOSURES
+    = "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-ubA5XvBh"
+
   def createAssessmentTemplate(name: String, arn: String): String = {
     val createAssessmentTemplateRequest = new CreateAssessmentTemplateRequest()
       .withAssessmentTargetArn(arn)
       .withDurationInSeconds(3600)
       .withRulesPackageArns(
-        "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-lLmwe1zd",
-        "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-SnojL3Z6"
+        SECURITY_BEST_PRACTICES,
+        RUNTIME_BEHAVIOUR_ANALYSIS
       )
       .withUserAttributesForFindings(new Attribute().withKey(inspectionTagName).withValue(name))
       .withAssessmentTemplateName(name)
@@ -149,7 +158,7 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
       .withAssessmentTemplateArn(assessmentTemplateArn)
     try {
       client.startAssessmentRun(startAssessmentRunRequest)
-      logger.error(s"Assessment run started for $name")
+      logger.info(s"Assessment run started for $name")
     } catch {
       case e: InvalidInputException =>
         logger.error(s"Unable to start Assessment run '$name' (${e.getMessage})")

@@ -8,18 +8,6 @@ import com.gu.inspectorlambda.aws._
 
 object ChiefInspector extends StrictLogging {
 
-  //  "name": "Security Best Practices",
-  //  "arn": "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-SnojL3Z6",
-
-  //  "name": "Runtime Behavior Analysis",
-  //  "arn": "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-lLmwe1zd",
-
-  //  "name": "CIS Operating System Security Configuration Benchmarks",
-  //  "arn": "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-sJBhCr0F",
-
-  //  "name": "Common Vulnerabilities and Exposures",
-  //  "arn": "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-ubA5XvBh",
-
   val inspectionTagName = "Inspection"
   private val instancesPerTagCount = 5
 
@@ -47,8 +35,6 @@ object ChiefInspector extends StrictLogging {
       val assessmentTemplateArn = inspector.getAssessmentTemplate(name, assessmentTargetArn) getOrElse inspector.createAssessmentTemplate(name, assessmentTargetArn)
       inspector.startAssessmentRun(nameEpoch, assessmentTemplateArn)
     })
-
-    logger.info("Done")
   }
 
   private[inspectorlambda] def constructNameEpoch(tagCombo: TagCombo): String = {
