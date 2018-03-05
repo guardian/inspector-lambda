@@ -8,6 +8,11 @@ A lambda to:
 * Schedule an AWS Inspector run against that tag
 
 This application is built with `sbt assembly` and should be published to
-`s3://guardian-dist/guardian/PROD/inspectory-lambda.jar` in the **Deploy Tools** account.
+
+```
+s3://guardian-dist/guardian/PROD/inspector-lambda/inspector-lambda.jar
+``` 
+
+in the **Deploy Tools** account.
 
 This application is installed in target accounts via a stack set from the Guardian **Root** account.
