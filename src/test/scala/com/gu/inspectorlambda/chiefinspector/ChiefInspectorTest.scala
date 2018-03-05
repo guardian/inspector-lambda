@@ -40,18 +40,23 @@ class ChiefInspectorTest extends FreeSpec with Matchers {
     "Stack 1 when Stack tag present" in {
       ChiefInspector.getInstancesWithMatchingTag(instances, "Stack", Some("stack1")) shouldBe Set(instance1)
     }
+
     "Stack 2 when Stack tag not present" in {
       ChiefInspector.getInstancesWithMatchingTag(instances, "Stack", None) shouldBe Set(instance2)
     }
+
     "Stack 3 when App tag present" in {
       ChiefInspector.getInstancesWithMatchingTag(instances, "App", Some("app3")) shouldBe Set(instance3)
     }
+
     "Stack 4 when App tag not present" in {
       ChiefInspector.getInstancesWithMatchingTag(instances, "App", None) shouldBe Set(instance4)
     }
+
     "Stack 5 when Stage tag present" in {
       ChiefInspector.getInstancesWithMatchingTag(instances, "Stage", Some("stage5")) shouldBe Set(instance5)
     }
+
     "Stack 6 when Stage tag not present" in {
       ChiefInspector.getInstancesWithMatchingTag(instances, "Stage", None) shouldBe Set(instance6)
     }
@@ -59,7 +64,6 @@ class ChiefInspectorTest extends FreeSpec with Matchers {
     "Stack 1 when all tags present" in {
       ChiefInspector.getInstancesWithMatchingTags(instances, TagCombo(Some("stack1"), Some("app1"), Some("stage1"))) shouldBe Set("instance1")
     }
-
   }
 
   "tag combo construction" - {
@@ -93,7 +97,6 @@ class ChiefInspectorTest extends FreeSpec with Matchers {
         TagCombo(Some("stack6"), Some("app6"), None)
       )
     }
-
   }
 }
 
