@@ -36,10 +36,12 @@ in the **Deploy Tools** account.
 You can perform this operation at the command line while updating the lamdba itself with
 
 ```
-aws --profile security --region eu-west-1 \
+aws --profile <profile> --region eu-west-1 \
     lambda update-function-code --function-name inspectorlambda \
     --s3-bucket guardian-dist \
     --s3-key guardian/PROD/inspector-lambda/inspector-lambda.jar
 ```
+
+where you specify `<profile>` accordingly.
 
 inspector-lambda is then installed in target accounts via a stack set from the Guardian **Root** account.
