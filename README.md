@@ -7,6 +7,24 @@ A lambda to:
 * Add a unique tag to each of the instances
 * Schedule an AWS Inspector run against that tag
 
+## Running locally
+
+To run the lambda locally make sure you have Janus credentials for the corresponsing account and run 
+
+```
+sbt ';run <account name>'
+```
+
+For instance 
+
+```
+sbt ';run security'
+```
+
+for the **security** account.
+
+## Deployment
+
 This application is built with `sbt assembly` and should be published to
 
 ```
@@ -15,4 +33,4 @@ s3://guardian-dist/guardian/PROD/inspector-lambda/inspector-lambda.jar
 
 in the **Deploy Tools** account.
 
-This application is installed in target accounts via a stack set from the Guardian **Root** account.
+inspector-lambda is then installed in target accounts via a stack set from the Guardian **Root** account.
