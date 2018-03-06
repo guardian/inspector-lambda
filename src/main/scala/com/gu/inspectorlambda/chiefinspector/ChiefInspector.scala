@@ -31,7 +31,7 @@ object ChiefInspector extends StrictLogging {
       ec2.createTags(name, matchingInstanceIds)
     })
 
-    // Sleeping for 10 seconds to allow to tags propagation
+    // Sleeping for 10 seconds to allow for tags propagation
     Thread.sleep(10000)
 
     matchingInstanceSets.foreach( mis => {
