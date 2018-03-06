@@ -25,11 +25,19 @@ object ChiefInspector extends StrictLogging {
     matchingInstanceSets.foreach( mis => {
       val tagCombo = mis._1
       val name = constructName(tagCombo)
-      val nameEpoch = constructNameEpoch(tagCombo)
       val matchingInstanceIds = mis._2
       logger.info(s"Found set: $name -> $matchingInstanceIds")
       ec2.removeTags(name, allInstanceIds)
       ec2.createTags(name, matchingInstanceIds)
+    })
+
+    // Sleeping for 10 seconds to allow to tags propagation
+    Thread.sleep(10000)
+
+    matchingInstanceSets.foreach( mis => {
+      val tagCombo = mis._1
+      val name = constructName(tagCombo)
+      val nameEpoch = constructNameEpoch(tagCombo)
       val resourceGroupArn: String = inspector.getResourceGroup(name) getOrElse inspector.createResourceGroup(name)
       val assessmentTargetArn = inspector.getAssessmentTarget(name, resourceGroupArn) getOrElse inspector.createAssessmentTarget(name, resourceGroupArn)
       val assessmentTemplateArn = inspector.getAssessmentTemplate(name, assessmentTargetArn) getOrElse inspector.createAssessmentTemplate(name, assessmentTargetArn)
