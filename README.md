@@ -25,23 +25,11 @@ for the **security** account.
 
 ## Deployment
 
-This application is built with `sbt assembly` and should be published to
+To deploy Inspector Lambda, make sure you have **deployTools** credentials and run
 
 ```
-s3://guardian-dist/guardian/PROD/inspector-lambda/inspector-lambda.jar
-``` 
-
-in the **Deploy Tools** account.
-
-You can perform this operation at the command line while updating the lamdba itself with
-
-```
-aws --profile <profile> --region eu-west-1 \
-    lambda update-function-code --function-name inspectorlambda \
-    --s3-bucket guardian-dist \
-    --s3-key guardian/PROD/inspector-lambda/inspector-lambda.jar
+./deploy-lambda.sh
 ```
 
-where you specify `<profile>` accordingly.
 
 inspector-lambda is then installed in target accounts via a stack set from the Guardian **Root** account.
