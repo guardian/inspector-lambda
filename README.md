@@ -25,11 +25,19 @@ for the **security** account.
 
 ## Deployment
 
-To deploy Inspector Lambda, make sure you have **deployTools** credentials and run
+### Local development and deployment to Deploy Tools
+
+To deploy a new release of Inspector Lambda, you may first want to update the value of `softwareVersion` in **build.sbt** as well as the corresponding values in **scripts/jar-upload-to-s3.sh** and **scripts/lambda-function-update.sh**. Then,  make sure you have **deployTools** credentials and run
 
 ```
-./deploy-lambda.sh
+./jar-upload-to-s3.sh
 ```
 
+### Team release
 
-inspector-lambda is then installed in target accounts via a stack set from the Guardian **Root** account.
+To upgrade your team's lambda function, make sure you have the correct Janus credentials and run 
+
+```
+./lambda-function-update.sh <aws-account-name>
+```
+
