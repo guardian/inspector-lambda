@@ -1,10 +1,7 @@
 scalaVersion := "2.12.4"
 
-val softwareVersion = "0.1.0" // If updating, also update the version number in deploy-lambda.sh
-
 name := "inspector-lambda"
 organization := "com.gu"
-version := softwareVersion
 
 val awsSdkVersion = "1.11.258"
 
@@ -22,4 +19,5 @@ libraryDependencies ++= Seq(
 )
 
 scalacOptions := Seq("-unchecked", "-deprecation")
-assemblyJarName in assembly := s"inspector-lambda-${softwareVersion}.jar"
+assemblyJarName in assembly := s"inspector-lambda-${(version in ThisBuild).value}.jar"
+
