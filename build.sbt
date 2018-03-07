@@ -2,7 +2,6 @@ scalaVersion := "2.12.4"
 
 name := "inspector-lambda"
 organization := "com.gu"
-version := "0.1.0"
 
 val awsSdkVersion = "1.11.258"
 
@@ -20,4 +19,4 @@ libraryDependencies ++= Seq(
 )
 
 scalacOptions := Seq("-unchecked", "-deprecation")
-assemblyJarName in assembly := "inspector-lambda.jar"
+assemblyJarName in assembly := s"inspector-lambda-${(version in ThisBuild).value}.jar"
