@@ -1,8 +1,6 @@
 #!/bin/bash
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-if [ $# -eq 0 ]; then
+if [ $# -ne 1 ]; then
     echo "No arguments provided."
     echo "usage: ./lambda-function-update.sh <aws-account-name>"
     exit 1
@@ -10,7 +8,7 @@ fi
 
 AWSPROFILE="$1"
 
-cd "$DIR/.."
+cd "$( dirname "${BASH_SOURCE[0]}" )/.."
 
 SOFTWARE_VERSION=`cut -d '"' -f 2 version.sbt `
 JARFILENAME="inspector-lambda-$SOFTWARE_VERSION.jar"

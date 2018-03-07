@@ -1,8 +1,6 @@
 #!/bin/bash
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-cd "$DIR/.."
+cd "$( dirname "${BASH_SOURCE[0]}" )/.."
 
 SCALA_FOLDER="scala-2.12" 
 SOFTWARE_VERSION=`cut -d '"' -f 2 version.sbt `
