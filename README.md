@@ -25,23 +25,19 @@ for the **security** account.
 
 ## Deployment
 
-This application is built with `sbt assembly` and should be published to
+### Local development and deployment to Deploy Tools
+
+To deploy a new release of Inspector Lambda, you may first want to update the value of `softwareVersion` in **build.sbt** as well as the corresponding values in **scripts/jar-upload-to-s3.sh** and **scripts/lambda-function-update.sh**. Then,  make sure you have **deployTools** credentials and run
 
 ```
-s3://guardian-dist/guardian/PROD/inspector-lambda/inspector-lambda.jar
-``` 
-
-in the **Deploy Tools** account.
-
-You can perform this operation at the command line while updating the lamdba itself with
-
-```
-aws --profile <profile> --region eu-west-1 \
-    lambda update-function-code --function-name inspectorlambda \
-    --s3-bucket guardian-dist \
-    --s3-key guardian/PROD/inspector-lambda/inspector-lambda.jar
+./jar-upload-to-s3.sh
 ```
 
-where you specify `<profile>` accordingly.
+### Team release
 
-inspector-lambda is then installed in target accounts via a stack set from the Guardian **Root** account.
+To upgrade your team's lambda function, make sure you have the correct Janus credentials and run 
+
+```
+./lambda-function-update.sh <aws-account-name>
+```
+

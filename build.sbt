@@ -20,3 +20,4 @@ libraryDependencies ++= Seq(
 
 scalacOptions := Seq("-unchecked", "-deprecation")
 assemblyJarName in assembly := s"inspector-lambda-${(version in ThisBuild).value}.jar"
+
