@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Centralised security reporting for AWS
+Description: Inspector Lambda
 
 Resources:
 
