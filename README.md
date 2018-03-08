@@ -35,9 +35,5 @@ To deploy a new release of Inspector Lambda, you may first want to update the va
 
 ### Team release
 
-To upgrade your team's lambda function, make sure you have the correct Janus credentials and run 
-
-```
-./lambda-function-update.sh <aws-account-name>
-```
+The lambda is pushed to other AWS accounts using StackSets (see security team for details).
 
