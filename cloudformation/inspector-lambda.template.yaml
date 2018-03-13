@@ -6,6 +6,7 @@ Resources:
   InspectorRole:
     Type: AWS::IAM::Role
     Properties:
+      ManagedPolicyArns: ["arn:aws:iam::aws:policy/AmazonInspectorFullAccess"]
       AssumeRolePolicyDocument:
         Statement:
         - Effect: Allow
@@ -47,7 +48,7 @@ Resources:
         Fn::GetAtt: [ "InspectorRole", "Arn" ]
       Runtime: java8
       MemorySize: 256
-      Timeout: 60
+      Timeout: 300
 
   InspectorScheduleRule:
     Type: "AWS::Events::Rule"
