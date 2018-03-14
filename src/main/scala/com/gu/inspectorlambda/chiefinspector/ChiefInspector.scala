@@ -3,6 +3,7 @@ package com.gu.inspectorlambda.chiefinspector
 import com.typesafe.scalalogging.StrictLogging
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.inspector.AmazonInspector
+import com.amazonaws.services.inspector.model.RegisterCrossAccountAccessRoleRequest
 import com.gu.inspectorlambda.model.{SimpleInstance, TagCombo}
 import com.gu.inspectorlambda.aws._
 
@@ -14,6 +15,9 @@ object ChiefInspector extends StrictLogging {
   def createAndRunAssessments(ec2Client: AmazonEC2, inspectorClient: AmazonInspector): Unit = {
     val ec2 = new AWSEC2(ec2Client)
     val inspector = new AWSInspector(inspectorClient)
+
+    inspector.registerRoleArn
+
     val instances = ec2.getRunningInstances
     val allInstanceIds = instances.map(i => i.instanceId)
 
@@ -22,27 +26,24 @@ object ChiefInspector extends StrictLogging {
       matchingInstances = getInstancesWithMatchingTags(instances, tagCombo)
     } yield tagCombo -> matchingInstances).toMap
 
-    matchingInstanceSets.foreach( mis => {
-      val tagCombo = mis._1
+    matchingInstanceSets.foreach { case (tagCombo, matchingInstanceIds) =>
       val name = constructName(tagCombo)
-      val matchingInstanceIds = mis._2
       logger.info(s"Found set: $name -> $matchingInstanceIds")
       ec2.removeTags(name, allInstanceIds)
       ec2.createTags(name, matchingInstanceIds)
-    })
+    }
 
     // Sleeping for 10 seconds to allow for tags propagation
     Thread.sleep(10000)
 
-    matchingInstanceSets.foreach( mis => {
-      val tagCombo = mis._1
+    matchingInstanceSets.foreach { case (tagCombo, _) =>
       val name = constructName(tagCombo)
       val nameEpoch = constructNameEpoch(tagCombo)
       val resourceGroupArn: String = inspector.getResourceGroup(name) getOrElse inspector.createResourceGroup(name)
       val assessmentTargetArn = inspector.getAssessmentTarget(name, resourceGroupArn) getOrElse inspector.createAssessmentTarget(name, resourceGroupArn)
       val assessmentTemplateArn = inspector.getAssessmentTemplate(name, assessmentTargetArn) getOrElse inspector.createAssessmentTemplate(name, assessmentTargetArn)
       inspector.startAssessmentRun(nameEpoch, assessmentTemplateArn)
-    })
+    }
   }
 
   private[inspectorlambda] def constructNameEpoch(tagCombo: TagCombo): String = {

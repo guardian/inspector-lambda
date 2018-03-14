@@ -8,6 +8,11 @@ import scala.collection.JavaConverters._
 
 class AWSInspector(val client: AmazonInspector) extends StrictLogging {
 
+  def registerRoleArn = client.registerCrossAccountAccessRole(
+    new RegisterCrossAccountAccessRoleRequest().withRoleArn(sys.env("RoleArn"))
+  )
+
+
   def getResourceGroup(name: String): Option[String] = {
 
     val assessmentTargetArns = client.listAssessmentTargets(new ListAssessmentTargetsRequest()).getAssessmentTargetArns

@@ -42,6 +42,9 @@ Resources:
         S3Bucket: guardian-dist
         S3Key: guardian/PROD/inspector-lambda/inspector-lambda-0.5.0-SNAPSHOT.jar
       Description: "A regular rescan of a few instances for each Stack, App, Stage combination present"
+      Environment:
+        Variables:
+          RoleArn: Fn::GetAtt: [ "InspectorServiceRole", "Arn" ]
       FunctionName: inspectorlambda
       Handler: com.gu.inspectorlambda.Lambda::handleRequest
       Role:
@@ -78,4 +81,18 @@ Resources:
       SourceArn:
         Fn::GetAtt: [ "InspectorScheduleRule", "Arn" ]
 
-
+  InspectorServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - inspector.amazonaws.com
+                Action:
+                - sts:AssumeRole
+      ManagedPolicyArns:
+        - String
+      RoleName:
+        AWSServiceRoleForAmazonInspector
