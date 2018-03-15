@@ -53,7 +53,7 @@ Resources:
       Role:
         Fn::GetAtt: [ "InspectorRole", "Arn" ]
       Runtime: java8
-      MemorySize: 256
+      MemorySize: 512
       Timeout: 300
 
   InspectorScheduleRule:
