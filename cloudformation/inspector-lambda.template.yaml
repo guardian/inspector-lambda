@@ -44,7 +44,10 @@ Resources:
       Description: "A regular rescan of a few instances for each Stack, App, Stage combination present"
       Environment:
         Variables:
-          RoleArn: Fn::GetAtt: [ "InspectorServiceRole", "Arn" ]
+          RoleArn: 
+            Fn::GetAtt:
+              - "InspectorServiceRole"
+              - "Arn"
       FunctionName: inspectorlambda
       Handler: com.gu.inspectorlambda.Lambda::handleRequest
       Role:
@@ -90,8 +93,8 @@ Resources:
           Principal:
             Service:
             - inspector.amazonaws.com
-                Action:
-                - sts:AssumeRole
+          Action:
+          - sts:AssumeRole
       ManagedPolicyArns:
         - String
       RoleName:
