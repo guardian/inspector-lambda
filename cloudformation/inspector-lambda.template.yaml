@@ -96,6 +96,6 @@ Resources:
           Action:
           - sts:AssumeRole
       ManagedPolicyArns:
-        - String
+        - arn:aws:iam::aws:policy/aws-service-role/AmazonInspectorServiceRolePolicy
       RoleName:
         InspectorLambdaServiceRoleForAmazonInspector
