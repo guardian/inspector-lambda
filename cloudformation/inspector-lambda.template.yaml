@@ -98,4 +98,4 @@ Resources:
       ManagedPolicyArns:
         - String
       RoleName:
-        AWSServiceRoleForAmazonInspector
+        InspectorLambdaServiceRoleForAmazonInspector
