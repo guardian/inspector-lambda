@@ -3,7 +3,6 @@ package com.gu.inspectorlambda.chiefinspector
 import com.typesafe.scalalogging.StrictLogging
 import com.amazonaws.services.ec2.AmazonEC2
 import com.amazonaws.services.inspector.AmazonInspector
-import com.amazonaws.services.inspector.model.RegisterCrossAccountAccessRoleRequest
 import com.gu.inspectorlambda.model.{SimpleInstance, TagCombo}
 import com.gu.inspectorlambda.aws._
 
@@ -16,7 +15,7 @@ object ChiefInspector extends StrictLogging {
     val ec2 = new AWSEC2(ec2Client)
     val inspector = new AWSInspector(inspectorClient)
 
-    inspector.registerRoleArn
+    inspector.registerRoleArn()
 
     val instances = ec2.getRunningInstances
     val allInstanceIds = instances.map(i => i.instanceId)

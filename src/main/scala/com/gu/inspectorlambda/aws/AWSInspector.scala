@@ -8,10 +8,9 @@ import scala.collection.JavaConverters._
 
 class AWSInspector(val client: AmazonInspector) extends StrictLogging {
 
-  def registerRoleArn = client.registerCrossAccountAccessRole(
+  def registerRoleArn(): Unit = client.registerCrossAccountAccessRole(
     new RegisterCrossAccountAccessRoleRequest().withRoleArn(sys.env("RoleArn"))
   )
-
 
   def getResourceGroup(name: String): Option[String] = {
 
@@ -136,10 +135,12 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
 
   private val SECURITY_BEST_PRACTICES
     = "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-SnojL3Z6"
+  //noinspection ScalaUnusedSymbol
   private val CIS_OPERATING_SYSTEM_SECURITY_CONFIGURATION_BENCHMARKS
     = "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-sJBhCr0F"
   private val RUNTIME_BEHAVIOUR_ANALYSIS
     = "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-lLmwe1zd"
+  //noinspection ScalaUnusedSymbol
   private val COMMON_VULNERABILITIES_AND_EXPOSURES
     = "arn:aws:inspector:eu-west-1:357557129151:rulespackage/0-ubA5XvBh"
 
