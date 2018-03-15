@@ -27,7 +27,7 @@ for the **security** account.
 
 ### Local development and deployment to Deploy Tools
 
-To deploy a new release of Inspector Lambda, you may first want to update the value of `softwareVersion` in **build.sbt** as well as the corresponding values in **scripts/jar-upload-to-s3.sh** and **scripts/lambda-function-update.sh**. Then,  make sure you have **deployTools** credentials and run
+To deploy a new release of Inspector Lambda, you may first want to update the version value in **version.sbt**, then make sure you have **deployTools** credentials and run
 
 ```
 ./jar-upload-to-s3.sh
