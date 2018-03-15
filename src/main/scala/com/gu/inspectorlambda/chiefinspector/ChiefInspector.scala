@@ -16,6 +16,8 @@ object ChiefInspector extends StrictLogging {
     val inspector = new AWSInspector(inspectorClient)
 
     inspector.registerRoleArn()
+    // Sleeping for 10 seconds to allow for role propagation
+    Thread.sleep(10000)
 
     val instances = ec2.getRunningInstances
     val allInstanceIds = instances.map(i => i.instanceId)
