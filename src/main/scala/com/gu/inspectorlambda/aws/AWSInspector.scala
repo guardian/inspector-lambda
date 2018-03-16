@@ -60,41 +60,29 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
   }
 
   def getAssessmentTarget(name: String, arn: String): Option[String] = {
-//    logger.info("here")
-//    logger.info(name)
     val assessmentTargets = getAllAssessmentTargets(None)
-//    logger.info(assessmentTargets.toString)
-//    logger.info(arn)
 
     val matchingAssessmentTargets = assessmentTargets.filter(assessmentTarget => assessmentTarget.getName.equals(name))
 
-//    logger.info(matchingAssessmentTargets.size.toString)
-//    matchingAssessmentTargets.foreach(mat => {
-//      logger.info(mat.getArn)
-//      logger.info(mat.getResourceGroupArn)
-//    })
     // delete if arn is not correct
     matchingAssessmentTargets
-      .filter(assessmentTarget => !assessmentTarget.getResourceGroupArn.equals(arn))
+      .filter(!_.getResourceGroupArn.equals(arn))
       .foreach(assessmentTarget => {
-//        logger.info(s"Deleting ${assessmentTarget.getArn}")
+        logger.info(s"Deleting ${assessmentTarget.getArn}")
         val deleteAssessmentTargetRequest = new DeleteAssessmentTargetRequest()
           .withAssessmentTargetArn(assessmentTarget.getArn)
         client.deleteAssessmentTarget(deleteAssessmentTargetRequest)
+        Thread.sleep(3)
       })
 
     // Return if arn is correct
     matchingAssessmentTargets
-      .filter(assessmentTarget => {
-//        logger.info(s"Deleting ${assessmentTarget.getArn}");
-        assessmentTarget.getResourceGroupArn.equals(arn)
-      })
-      .map(assessmentTarget => assessmentTarget.getArn)
+      .filter(_.getResourceGroupArn.equals(arn))
+      .map(_.getArn)
       .headOption
   }
 
   def createAssessmentTarget(name: String, arn: String): String = {
-
     val createAssessmentTargetRequest = new CreateAssessmentTargetRequest()
       .withResourceGroupArn(arn)
       .withAssessmentTargetName(name)
@@ -119,6 +107,7 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
           val deleteAssessmentTemplateRequest = new DeleteAssessmentTemplateRequest()
             .withAssessmentTemplateArn(assessmentTemplate.getArn)
           client.deleteAssessmentTemplate(deleteAssessmentTemplateRequest)
+          Thread.sleep(3)
         })
 
       // Return if arn is correct

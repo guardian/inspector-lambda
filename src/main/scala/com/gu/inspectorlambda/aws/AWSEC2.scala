@@ -32,6 +32,7 @@ class AWSEC2 (val client: AmazonEC2) extends StrictLogging {
       .withTags(new Tag(inspectionTagName, name))
       .withResources(instanceIds.toList.asJava)
     client.deleteTags(tagsRequest)
+    Thread.sleep(3)
   }
 
 }
