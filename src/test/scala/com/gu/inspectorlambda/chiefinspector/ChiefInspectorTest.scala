@@ -9,22 +9,22 @@ class ChiefInspectorTest extends FreeSpec with Matchers {
 
     "construct fully populated tag correctly" in {
       val tc = new TagCombo(Some("a"), Some("b"), Some("c"))
-      ChiefInspector.constructName(tc) shouldBe ("AWSInspection-a-b-c")
+      ChiefInspector.constructName(tc) shouldBe ("AWSInspection--a--b--c")
     }
 
     "construct tag with no stack correctly" in {
       val tc = new TagCombo(None, Some("b"), Some("c"))
-      ChiefInspector.constructName(tc) shouldBe ("AWSInspection-None-b-c")
+      ChiefInspector.constructName(tc) shouldBe ("AWSInspection--None--b--c")
     }
 
     "construct tag with no app correctly" in {
       val tc = new TagCombo(Some("a"), None, Some("c"))
-      ChiefInspector.constructName(tc) shouldBe ("AWSInspection-a-None-c")
+      ChiefInspector.constructName(tc) shouldBe ("AWSInspection--a--None--c")
     }
 
     "construct tag with no stage correctly" in {
       val tc = new TagCombo(Some("a"), Some("b"), None)
-      ChiefInspector.constructName(tc) shouldBe ("AWSInspection-a-b-None")
+      ChiefInspector.constructName(tc) shouldBe ("AWSInspection--a--b--None")
     }
   }
 
