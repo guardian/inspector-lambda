@@ -40,14 +40,20 @@ Resources:
     Properties:
       Code:
         S3Bucket: guardian-dist
-        S3Key: guardian/PROD/inspector-lambda/inspector-lambda-0.5.0-SNAPSHOT.jar
+        S3Key: guardian/PROD/inspector-lambda/inspector-lambda-0.5.3-SNAPSHOT.jar
       Description: "A regular rescan of a few instances for each Stack, App, Stage combination present"
+      Environment:
+        Variables:
+          RoleArn: 
+            Fn::GetAtt:
+              - "InspectorServiceRole"
+              - "Arn"
       FunctionName: inspectorlambda
       Handler: com.gu.inspectorlambda.Lambda::handleRequest
       Role:
         Fn::GetAtt: [ "InspectorRole", "Arn" ]
       Runtime: java8
-      MemorySize: 256
+      MemorySize: 512
       Timeout: 300
 
   InspectorScheduleRule:
@@ -76,6 +82,60 @@ Resources:
       FunctionName: inspectorlambda
       Principal: events.amazonaws.com
       SourceArn:
-        Fn::GetAtt: [ "InspectorScheduleRule", "Arn" ]
+        Fn::GetAtt:
+          - "InspectorScheduleRule"
+          - "Arn"
 
+  InspectorServiceRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - inspector.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      RoleName:
+        InspectorLambdaServiceRoleForAmazonInspector
+
+  InspectorServicePolicy:
+    Type: "AWS::IAM::Policy"
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - 
+            Effect: "Allow"
+            Action:
+              - "ec2:DescribeAvailabilityZones"
+              - "ec2:DescribeCustomerGateways"
+              - "ec2:DescribeInstances"
+              - "ec2:DescribeTags"
+              - "ec2:DescribeInternetGateways"
+              - "ec2:DescribeNatGateways"
+              - "ec2:DescribeNetworkAcls"
+              - "ec2:DescribeNetworkInterfaces"
+              - "ec2:DescribePrefixLists"
+              - "ec2:DescribeRegions"
+              - "ec2:DescribeRouteTables"
+              - "ec2:DescribeSecurityGroups"
+              - "ec2:DescribeSubnets"
+              - "ec2:DescribeVpcEndpoints"
+              - "ec2:DescribeVpcPeeringConnections"
+              - "ec2:DescribeVpcs"
+              - "ec2:DescribeVpnConnections"
+              - "ec2:DescribeVpnGateways"
+              - "elasticloadbalancing:DescribeListeners"
+              - "elasticloadbalancing:DescribeLoadBalancers"
+              - "elasticloadbalancing:DescribeLoadBalancerAttributes"
+              - "elasticloadbalancing:DescribeRules"
+              - "elasticloadbalancing:DescribeTags"
+              - "elasticloadbalancing:DescribeTargetGroups"
+              - "elasticloadbalancing:DescribeTargetHealth"
+            Resource: "*"
+      PolicyName: InspectorLambdaServicePolicyForAmazonInspector
+      Roles:
+        - Ref: InspectorServiceRole
 

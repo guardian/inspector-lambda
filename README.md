@@ -25,15 +25,17 @@ for the **security** account.
 
 ## Deployment
 
-### Local development and deployment to Deploy Tools
+To deploy a new release of Inspector Lambda: 
 
-To deploy a new release of Inspector Lambda, you may first want to update the value of `softwareVersion` in **build.sbt** as well as the corresponding values in **scripts/jar-upload-to-s3.sh** and **scripts/lambda-function-update.sh**. Then,  make sure you have **deployTools** credentials and run
+- Update the version value in **version.sbt** as well as in the cloudformation file
 
-```
-./jar-upload-to-s3.sh
-```
+- Make sure you have **deployTools** and **Root** credentials.
 
-### Team release
+- Run (from the `script` folder)
 
-The lambda is pushed to other AWS accounts using StackSets (see security team for details).
+	```
+	./jar-upload-to-s3.sh
+	```
+
+- Apply the cloud-formation change from the Root account (StackSets deployment to other AWS accounts).
 

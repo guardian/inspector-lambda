@@ -8,7 +8,7 @@ import com.gu.inspectorlambda.chiefinspector.ChiefInspector
 
 object Main {
   def main(args: Array[String]): Unit = {
-    if (args.size != 1) {
+    if (args.length != 1) {
       println("Must provide a credentials stanza name")
       System.exit(1)
     }
