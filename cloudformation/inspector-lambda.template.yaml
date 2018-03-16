@@ -40,7 +40,7 @@ Resources:
     Properties:
       Code:
         S3Bucket: guardian-dist
-        S3Key: guardian/PROD/inspector-lambda/inspector-lambda-0.5.4-SNAPSHOT.jar
+        S3Key: guardian/PROD/inspector-lambda/inspector-lambda-0.5.5-SNAPSHOT.jar
       Description: "A regular rescan of a few instances for each Stack, App, Stage combination present"
       FunctionName: inspectorlambda
       Handler: com.gu.inspectorlambda.Lambda::handleRequest
