@@ -51,7 +51,7 @@ object ChiefInspector extends StrictLogging {
   }
 
   private[inspectorlambda] def constructNameEpoch(tagCombo: TagCombo): String = {
-    s"${constructName(tagCombo)}-${System.currentTimeMillis()}"
+    s"${constructName(tagCombo)}--${System.currentTimeMillis()}"
   }
 
   private[inspectorlambda] def constructName(tagCombo: TagCombo): String = {
