@@ -42,12 +42,6 @@ Resources:
         S3Bucket: guardian-dist
         S3Key: guardian/PROD/inspector-lambda/inspector-lambda-0.5.4-SNAPSHOT.jar
       Description: "A regular rescan of a few instances for each Stack, App, Stage combination present"
-      Environment:
-        Variables:
-          RoleArn: 
-            Fn::GetAtt:
-              - "InspectorServiceRole"
-              - "Arn"
       FunctionName: inspectorlambda
       Handler: com.gu.inspectorlambda.Lambda::handleRequest
       Role:
