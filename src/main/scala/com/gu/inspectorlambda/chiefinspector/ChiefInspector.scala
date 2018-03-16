@@ -15,10 +15,6 @@ object ChiefInspector extends StrictLogging {
     val ec2 = new AWSEC2(ec2Client)
     val inspector = new AWSInspector(inspectorClient)
 
-    inspector.registerRoleArn()
-    // Sleeping for 10 seconds to allow for role propagation
-    Thread.sleep(10000)
-
     val instances = ec2.getRunningInstances
     val allInstanceIds = instances.map(i => i.instanceId)
 
@@ -37,12 +33,19 @@ object ChiefInspector extends StrictLogging {
     // Sleeping for 10 seconds to allow for tags propagation
     Thread.sleep(10000)
 
-    matchingInstanceSets.foreach { case (tagCombo, _) =>
+    val assessmentTemplates = matchingInstanceSets.map { case (tagCombo, _) =>
       val name = constructName(tagCombo)
-      val nameEpoch = constructNameEpoch(tagCombo)
       val resourceGroupArn: String = inspector.getResourceGroup(name) getOrElse inspector.createResourceGroup(name)
       val assessmentTargetArn = inspector.getAssessmentTarget(name, resourceGroupArn) getOrElse inspector.createAssessmentTarget(name, resourceGroupArn)
       val assessmentTemplateArn = inspector.getAssessmentTemplate(name, assessmentTargetArn) getOrElse inspector.createAssessmentTemplate(name, assessmentTargetArn)
+      (tagCombo, assessmentTemplateArn)
+    }
+
+    // Sleeping for 10 seconds to allow for role propogation - only actually needed on first run
+    Thread.sleep(10000)
+
+    assessmentTemplates .foreach { case (tagCombo, assessmentTemplateArn) =>
+      val nameEpoch = constructNameEpoch(tagCombo)
       inspector.startAssessmentRun(nameEpoch, assessmentTemplateArn)
     }
   }
@@ -55,7 +58,7 @@ object ChiefInspector extends StrictLogging {
     val stack = tagCombo.stack.getOrElse("None")
     val app = tagCombo.app.getOrElse("None")
     val stage = tagCombo.stage.getOrElse("None")
-    s"AWSInspection-$stack-$app-$stage"
+    Array("AWSInspection", stack, app, stage).mkString("--")
   }
 
   private[inspectorlambda] def getInstancesWithMatchingTags(instances: Set[SimpleInstance], tc:TagCombo): Set[String] = {
