@@ -59,6 +59,21 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
     }
   }
 
+  // These implementations can be deleted once the old bad targets and
+  // templates have been removed.
+  def deleteOldAssessmentTarget(name: String): Unit = {
+    val assessmentTargets = getAllAssessmentTargets(None)
+    val matchingAssessmentTargets = assessmentTargets.filter(assessmentTarget => assessmentTarget.getName.equals(name))
+    matchingAssessmentTargets
+      .foreach(assessmentTarget => {
+        logger.info(s"Deleting ${assessmentTarget.getArn}")
+        val deleteAssessmentTargetRequest = new DeleteAssessmentTargetRequest()
+          .withAssessmentTargetArn(assessmentTarget.getArn)
+        client.deleteAssessmentTarget(deleteAssessmentTargetRequest)
+        Thread.sleep(3)
+      })
+  }
+
   def getAssessmentTarget(name: String, arn: String): Option[String] = {
     val assessmentTargets = getAllAssessmentTargets(None)
 
@@ -88,6 +103,29 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
       .withAssessmentTargetName(name)
     val createAssessmentTargetResult = client.createAssessmentTarget(createAssessmentTargetRequest)
     createAssessmentTargetResult.getAssessmentTargetArn
+  }
+
+  // These implementations can be deleted once the old bad targets and
+  // templates have been removed.
+  def deleteOldAssessmentTemplate(name: String): Unit = {
+    val assessmentTemplateArns = client.listAssessmentTemplates(new ListAssessmentTemplatesRequest()).getAssessmentTemplateArns
+    if (assessmentTemplateArns.isEmpty)
+      None
+    else {
+
+      val matchingAssessmentTemplates = client.describeAssessmentTemplates(new DescribeAssessmentTemplatesRequest().withAssessmentTemplateArns(assessmentTemplateArns)).getAssessmentTemplates.asScala
+        .filter(assessmentTemplate => assessmentTemplate.getName.equals(name))
+
+      // delete if arn is not correct
+      matchingAssessmentTemplates
+        .foreach(assessmentTemplate => {
+          val deleteAssessmentTemplateRequest = new DeleteAssessmentTemplateRequest()
+            .withAssessmentTemplateArn(assessmentTemplate.getArn)
+          client.deleteAssessmentTemplate(deleteAssessmentTemplateRequest)
+          Thread.sleep(3)
+        })
+
+    }
   }
 
   def getAssessmentTemplate(name: String, arn: String): Option[String] = {
