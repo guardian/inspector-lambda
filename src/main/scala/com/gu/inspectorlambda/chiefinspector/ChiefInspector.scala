@@ -33,6 +33,14 @@ object ChiefInspector extends StrictLogging {
     // Sleeping for 10 seconds to allow for tags propagation
     Thread.sleep(10000)
 
+    // These calls, and their underlying implementations, can be deleted once the old bad targets and
+    // templates have been removed.
+    matchingInstanceSets.foreach { case (tagCombo, _) =>
+      val oldName = constructOldName(tagCombo)
+      inspector.deleteOldAssessmentTarget(oldName)
+      inspector.deleteOldAssessmentTemplate(oldName)
+    }
+
     val assessmentTemplates = matchingInstanceSets.map { case (tagCombo, _) =>
       val name = constructName(tagCombo)
       val resourceGroupArn: String = inspector.getResourceGroup(name) getOrElse inspector.createResourceGroup(name)
@@ -59,6 +67,15 @@ object ChiefInspector extends StrictLogging {
     val app = tagCombo.app.getOrElse("None")
     val stage = tagCombo.stage.getOrElse("None")
     Array("AWSInspection", stack, app, stage).mkString("--")
+  }
+
+  // These implementations can be deleted once the old bad targets and
+  // templates have been removed.
+  private[inspectorlambda] def constructOldName(tagCombo: TagCombo): String = {
+    val stack = tagCombo.stack.getOrElse("None")
+    val app = tagCombo.app.getOrElse("None")
+    val stage = tagCombo.stage.getOrElse("None")
+    Array("AWSInspection", stack, app, stage).mkString("-")
   }
 
   private[inspectorlambda] def getInstancesWithMatchingTags(instances: Set[SimpleInstance], tc:TagCombo): Set[String] = {

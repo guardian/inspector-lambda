@@ -1,6 +1,19 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Inspector Lambda
 
+Parameters:
+  InspectorLambdaDistBucket:
+    Description: S3 bucket containing the Lambda artifacts
+    Type: String
+  Version:
+    Description: Version of lambda artifact to deploy
+    Type: String
+
+Mappings:
+  Constants:
+    BucketLambdaJarPath:
+      Value: guardian/PROD/inspector-lambda/
+
 Resources:
 
   InspectorRole:
@@ -39,10 +52,14 @@ Resources:
     Type: "AWS::Lambda::Function"
     Properties:
       Code:
-        S3Bucket: guardian-dist
-        S3Key: guardian/PROD/inspector-lambda/inspector-lambda-0.5.6-SNAPSHOT.jar
+        S3Bucket: !Ref InspectorLambdaDistBucket
+        S3Key:
+          Fn::Sub:
+          - ${path}inspector-lambda-${version}.jar
+          - path: !FindInMap [Constants, BucketLambdaJarPath, Value]
+            version: !Ref Version
       Description: "A regular rescan of a few instances for each Stack, App, Stage combination present"
-      FunctionName: inspectorlambda
+      FunctionName: inspectorlambda2
       Handler: com.gu.inspectorlambda.Lambda::handleRequest
       Role:
         Fn::GetAtt: [ "InspectorRole", "Arn" ]
@@ -53,7 +70,7 @@ Resources:
   InspectorScheduleRule:
     Type: "AWS::Events::Rule"
     Properties:
-      Name: InspectionScheduler
+      Name: InspectionScheduler2
       ScheduleExpression: cron(0 3 ? * MON,THU *)
       Targets:
         -
@@ -66,14 +83,14 @@ Resources:
   InspectorLogGroup:
     Type: "AWS::Logs::LogGroup"
     Properties:
-      LogGroupName: /aws/lambda/inspectorlambda
+      LogGroupName: /aws/lambda/inspectorlambda2
       RetentionInDays: 30
 
   InspectorLambdaPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: inspectorlambda
+      FunctionName: inspectorlambda2
       Principal: events.amazonaws.com
       SourceArn:
         Fn::GetAtt:
