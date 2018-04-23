@@ -59,7 +59,7 @@ Resources:
           - path: !FindInMap [Constants, BucketLambdaJarPath, Value]
             version: !Ref Version
       Description: "A regular rescan of a few instances for each Stack, App, Stage combination present"
-      FunctionName: inspectorlambda2
+      FunctionName: inspectorlambda
       Handler: com.gu.inspectorlambda.Lambda::handleRequest
       Role:
         Fn::GetAtt: [ "InspectorRole", "Arn" ]
@@ -83,14 +83,14 @@ Resources:
   InspectorLogGroup:
     Type: "AWS::Logs::LogGroup"
     Properties:
-      LogGroupName: /aws/lambda/inspectorlambda2
+      LogGroupName: /aws/lambda/inspectorlambda
       RetentionInDays: 30
 
   InspectorLambdaPermission:
     Type: "AWS::Lambda::Permission"
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: inspectorlambda2
+      FunctionName: inspectorlambda
       Principal: events.amazonaws.com
       SourceArn:
         Fn::GetAtt:
