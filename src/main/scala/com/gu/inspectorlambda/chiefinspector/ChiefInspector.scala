@@ -44,7 +44,10 @@ object ChiefInspector extends StrictLogging {
     val assessmentTemplates = matchingInstanceSets.map { case (tagCombo, _) =>
       val name = constructName(tagCombo)
       val resourceGroupArn: String = inspector.getResourceGroup(name) getOrElse inspector.createResourceGroup(name)
-      val assessmentTargetArn = inspector.getAssessmentTarget(name, resourceGroupArn) getOrElse inspector.createAssessmentTarget(name, resourceGroupArn)
+      val assessmentTargetArn = inspector.getAssessmentTarget(name, resourceGroupArn) getOrElse {
+        Thread.sleep(5000) // allow deletion of old asessment targets to take effect
+        inspector.createAssessmentTarget(name, resourceGroupArn)
+      }
       val assessmentTemplateArn = inspector.getAssessmentTemplate(name, assessmentTargetArn) getOrElse inspector.createAssessmentTemplate(name, assessmentTargetArn)
       (tagCombo, assessmentTemplateArn)
     }
