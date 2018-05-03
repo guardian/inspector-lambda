@@ -9,7 +9,7 @@ import scala.collection.JavaConverters._
 
 class AWSInspector(val client: AmazonInspector) extends StrictLogging {
 
-  val sleepForConsistencyMillis = 2000
+  val sleeptoWaitForEventualConsistencyMillis = 2000
 
   def getResourceGroup(name: String): Option[String] = {
 
@@ -75,7 +75,7 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
         val deleteAssessmentTargetRequest = new DeleteAssessmentTargetRequest()
           .withAssessmentTargetArn(assessmentTarget.getArn)
         client.deleteAssessmentTarget(deleteAssessmentTargetRequest)
-        Thread.sleep(sleepForConsistencyMillis)
+        Thread.sleep(sleeptoWaitForEventualConsistencyMillis)
       })
 
     // Return if arn is correct
@@ -110,7 +110,7 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
           val deleteAssessmentTemplateRequest = new DeleteAssessmentTemplateRequest()
             .withAssessmentTemplateArn(assessmentTemplate.getArn)
           client.deleteAssessmentTemplate(deleteAssessmentTemplateRequest)
-          Thread.sleep(sleepForConsistencyMillis)
+          Thread.sleep(sleeptoWaitForEventualConsistencyMillis)
         })
 
       // Return if arn is correct
