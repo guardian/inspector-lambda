@@ -4,9 +4,12 @@ import com.amazonaws.services.inspector.AmazonInspector
 import com.amazonaws.services.inspector.model._
 import com.gu.inspectorlambda.chiefinspector.ChiefInspector.inspectionTagName
 import com.typesafe.scalalogging.StrictLogging
+
 import scala.collection.JavaConverters._
 
 class AWSInspector(val client: AmazonInspector) extends StrictLogging {
+
+  val sleepForConsistencyMillis = 2000
 
   def getResourceGroup(name: String): Option[String] = {
 
@@ -62,11 +65,11 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
   // These implementations can be deleted once the old bad targets and
   // templates have been removed.
   def deleteOldAssessmentTarget(name: String): Unit = {
-    logger.info(s"Searching for old ${name} assessment targets to remove")
+    logger.info(s"Searching for old $name assessment targets to remove")
     val assessmentTargets = getAllAssessmentTargets(None)
     logger.info(s"Found ${assessmentTargets.size} old assessment targets")
     val matchingAssessmentTargets = assessmentTargets.filter(assessmentTarget => assessmentTarget.getName.equals(name))
-    logger.info(s"Found ${matchingAssessmentTargets.size} old assessment targets with correct name: ${name} ")
+    logger.info(s"Found ${matchingAssessmentTargets.size} old assessment targets with correct name: $name")
     matchingAssessmentTargets
       .foreach(assessmentTarget => {
         logger.info(s"Deleting ${assessmentTarget.getArn}")
@@ -83,17 +86,18 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
 
     // delete if arn is not correct
     matchingAssessmentTargets
-      .filter(!_.getResourceGroupArn.equals(arn))
+      .filter{at:AssessmentTarget => !at.getResourceGroupArn.equals(arn) }
       .foreach(assessmentTarget => {
         logger.info(s"Deleting ${assessmentTarget.getArn}")
         val deleteAssessmentTargetRequest = new DeleteAssessmentTargetRequest()
           .withAssessmentTargetArn(assessmentTarget.getArn)
         client.deleteAssessmentTarget(deleteAssessmentTargetRequest)
+        Thread.sleep(sleepForConsistencyMillis)
       })
 
     // Return if arn is correct
     matchingAssessmentTargets
-      .filter(_.getResourceGroupArn.equals(arn))
+      .filter{at:AssessmentTarget => at.getResourceGroupArn.equals(arn) }
       .map(_.getArn)
       .headOption
   }
@@ -109,7 +113,7 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
   // These implementations can be deleted once the old bad targets and
   // templates have been removed.
   def deleteOldAssessmentTemplate(name: String): Unit = {
-    logger.info(s"Searching for old ${name} assessment templates to remove")
+    logger.info(s"Searching for old $name assessment templates to remove")
     val assessmentTemplateArns = client.listAssessmentTemplates(new ListAssessmentTemplatesRequest()).getAssessmentTemplateArns
     if (assessmentTemplateArns.isEmpty)
       None
@@ -117,7 +121,7 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
       logger.info(s"Found ${assessmentTemplateArns.size} old assessment templates")
       val matchingAssessmentTemplates = client.describeAssessmentTemplates(new DescribeAssessmentTemplatesRequest().withAssessmentTemplateArns(assessmentTemplateArns)).getAssessmentTemplates.asScala
         .filter(assessmentTemplate => assessmentTemplate.getName.equals(name))
-      logger.info(s"Found ${matchingAssessmentTemplates.size} old assessment templates with correct name: ${name} ")
+      logger.info(s"Found ${matchingAssessmentTemplates.size} old assessment templates with correct name: $name")
 
       // delete if arn is not correct
       matchingAssessmentTemplates
@@ -125,6 +129,7 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
           val deleteAssessmentTemplateRequest = new DeleteAssessmentTemplateRequest()
             .withAssessmentTemplateArn(assessmentTemplate.getArn)
           client.deleteAssessmentTemplate(deleteAssessmentTemplateRequest)
+          Thread.sleep(sleepForConsistencyMillis)
         })
 
     }
@@ -147,6 +152,7 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
           val deleteAssessmentTemplateRequest = new DeleteAssessmentTemplateRequest()
             .withAssessmentTemplateArn(assessmentTemplate.getArn)
           client.deleteAssessmentTemplate(deleteAssessmentTemplateRequest)
+          Thread.sleep(sleepForConsistencyMillis)
         })
 
       // Return if arn is correct

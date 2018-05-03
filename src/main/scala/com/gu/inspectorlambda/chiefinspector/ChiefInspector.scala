@@ -8,6 +8,8 @@ import com.gu.inspectorlambda.aws._
 
 object ChiefInspector extends StrictLogging {
 
+  val sleepForPropagationMillis = 10000
+
   val inspectionTagName = "Inspection"
   private val instancesPerTagCount = 5
 
@@ -31,7 +33,7 @@ object ChiefInspector extends StrictLogging {
     }
 
     // Sleeping for 10 seconds to allow for tags propagation
-    Thread.sleep(10000)
+    Thread.sleep(sleepForPropagationMillis)
 
     // These calls, and their underlying implementations, can be deleted once the old bad targets and
     // templates have been removed.
@@ -50,7 +52,7 @@ object ChiefInspector extends StrictLogging {
     }
 
     // Sleeping for 10 seconds to allow for role propogation - only actually needed on first run
-    Thread.sleep(10000)
+    Thread.sleep(sleepForPropagationMillis)
 
     assessmentTemplates .foreach { case (tagCombo, assessmentTemplateArn) =>
       val nameEpoch = constructNameEpoch(tagCombo)
