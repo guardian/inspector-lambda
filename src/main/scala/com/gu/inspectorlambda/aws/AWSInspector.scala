@@ -86,7 +86,7 @@ class AWSInspector(val client: AmazonInspector) extends StrictLogging {
 
     // delete if arn is not correct
     matchingAssessmentTargets
-      .filterNot{at:AssessmentTarget => at.getResourceGroupArn.equals(arn) }
+      .filterNot{at: AssessmentTarget => at.getResourceGroupArn.equals(arn) }
       .foreach(assessmentTarget => {
         logger.info(s"Deleting ${assessmentTarget.getArn}")
         val deleteAssessmentTargetRequest = new DeleteAssessmentTargetRequest()
