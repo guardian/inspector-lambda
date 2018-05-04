@@ -9,7 +9,7 @@ A lambda to:
 
 ## Running locally
 
-To run the lambda locally make sure you have Janus credentials for the corresponsing account and run 
+To run the lambda locally make sure you have Janus credentials for the corresponding account and run 
 
 ```
 sbt ';run <account name>'
