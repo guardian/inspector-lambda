@@ -35,7 +35,7 @@ object ChiefInspector extends StrictLogging {
     // Sleeping for 10 seconds to allow for tags propagation
     Thread.sleep(sleepForPropagationMillis)
 
-    val assessmentTemplates = matchingInstanceSets.map { case (tagCombo, _) =>
+    val assessmentTemplates = matchingInstanceSets.par.map { case (tagCombo, _) =>
       val name = constructName(tagCombo)
       val resourceGroupArn: String = inspector.getResourceGroup(name) getOrElse inspector.createResourceGroup(name)
       val assessmentTargetArn = inspector.getAssessmentTarget(name, resourceGroupArn) getOrElse inspector.createAssessmentTarget(name, resourceGroupArn)
