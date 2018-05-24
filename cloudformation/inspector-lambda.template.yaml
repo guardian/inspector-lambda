@@ -71,7 +71,7 @@ Resources:
     Type: "AWS::Events::Rule"
     Properties:
       Name: InspectionScheduler2
-      ScheduleExpression: cron(0 3 ? * MON,THU *)
+      ScheduleExpression: cron(0 3 ? * * *)
       Targets:
         -
           Arn:
