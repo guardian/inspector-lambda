@@ -27,8 +27,6 @@ for the **security** account.
 
 To deploy a new release of Inspector Lambda: 
 
-- Update the version value in **version.sbt** as well as in the cloudformation file
-
 - Make sure you have **deployTools** and **Root** credentials.
 
 - Run (from the `script` folder)
