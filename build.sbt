@@ -3,7 +3,7 @@ scalaVersion := "2.12.4"
 name := "inspector-lambda"
 organization := "com.gu"
 
-val awsSdkVersion = "1.12.472"
+val awsSdkVersion = "1.12.484"
 
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-lambda-java-events" % "3.11.1",
@@ -19,4 +19,8 @@ libraryDependencies ++= Seq(
 )
 
 scalacOptions := Seq("-unchecked", "-deprecation")
-assemblyJarName in assembly := s"inspector-lambda-${(version in ThisBuild).value}.jar"
+assemblyJarName in assembly := s"inspector-lambda.jar"
+assemblyMergeStrategy in assembly := {
+    case PathList(ps @ _*) if ps.last endsWith "module-info.class" => MergeStrategy.first
+    case other: Any => MergeStrategy.defaultMergeStrategy(other)
+  }
