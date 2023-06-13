@@ -63,7 +63,7 @@ Resources:
       Handler: com.gu.inspectorlambda.Lambda::handleRequest
       Role:
         Fn::GetAtt: [ "InspectorRole", "Arn" ]
-      Runtime: java8
+      Runtime: java11
       MemorySize: 512
       Timeout: 300
 

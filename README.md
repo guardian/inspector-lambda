@@ -27,15 +27,13 @@ for the **security** account.
 
 To deploy a new release of Inspector Lambda: 
 
-- Update the version value in **version.sbt** as well as in the cloudformation file
+- Make sure you have **deployTools** credentials and **Root** permissions.
 
-- Make sure you have **deployTools** and **Root** credentials.
-
-- Run (from the `script` folder)
+- Run (from the `scripts` folder)
 
 	```
 	./jar-upload-to-s3.sh
 	```
 
-- Apply the cloud-formation change from the Root account (StackSets deployment to other AWS accounts).
+- Apply the cloudformation change from the Root account (StackSets deployment to other AWS accounts).
 
