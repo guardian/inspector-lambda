@@ -1,5 +1,4 @@
-# inspector-lambda
-
+# inspector-lambda - ARCHIVED, superceded by other tools.
 A lambda to:
 
 * Find all combinations of the App, Stack, Stage tags (including `not present`)
